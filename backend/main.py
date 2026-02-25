@@ -66,3 +66,26 @@ async def test_openrouter():
         return {'status': 'connected', 'response': response.content}
     except Exception as e:
         return {'status': 'error', 'message': str(e)}
+    
+@app.get('/data-summary')
+async def data_summary():
+    """Return counts of all seeded tables."""
+    from supabase import create_client
+    client = create_client(
+        os.getenv('NEXT_PUBLIC_SUPABASE_URL'),
+        os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+    )
+    tables = ['products', 'suppliers', 'supplier_products',
+             'forecasts', 'inventory', 'container_specs',
+             'supplier_scoring_weights']
+    counts = {}
+    for table in tables:
+        result = client.table(table).select('*', count='exact').execute()
+        counts[table] = result.count
+    return {'status': 'ok', 'counts': counts}
+
+
+# Should return:
+# {"status":"ok","counts":{"products":60,"suppliers":6,
+#   "supplier_products":195,"forecasts":720,"inventory":60,
+#   "container_specs":2,"supplier_scoring_weights":4}}
