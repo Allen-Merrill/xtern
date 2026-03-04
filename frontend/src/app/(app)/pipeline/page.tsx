@@ -468,7 +468,7 @@ export default function PipelinePage() {
                   padding: '12px 16px',
                 }}>
                   {/* Line 1: urgency dot + main summary */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
                     <div style={{
                       width: 8, height: 8, borderRadius: '50%',
                       background: urgColor,
@@ -478,40 +478,42 @@ export default function PipelinePage() {
                     <span className="mono" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 13 }}>
                       {req.sku}
                     </span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>→</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>—</span>
                     <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-                      short by <strong style={{ color: urgColor }}>{req.net_qty.toLocaleString()}</strong> qty
-                    </span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>→</span>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-                      considering <strong>{req.safety_stock}</strong> safety stock already have
+                      Order <strong style={{ color: urgColor }}>{(req.final_order_qty ?? req.net_qty).toLocaleString()} units</strong>
+                      {req.moq > 1 && <span style={{ color: 'var(--text-muted)', fontSize: 11 }}> (min {req.moq})</span>}
                     </span>
                     {req.need_by_date && req.need_by_date !== 'N/A' && (
                       <>
-                        <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>→</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>·</span>
                         <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-                          need by <strong style={{ color: urgColor }}>{req.need_by_date}</strong>
+                          stock runs out <strong style={{ color: urgColor }}>{req.need_by_date}</strong>
                         </span>
                       </>
                     )}
                   </div>
 
-                  {/* Line 2: metrics chips */}
+                  {/* Line 2: key numbers + trend chip */}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', paddingLeft: 18 }}>
-                    {req.uf_qty_in != null && (
-                      <MetricChip label="UF Qty In" value={req.uf_qty_in.toLocaleString()} accent="var(--accent-cyan)" />
-                    )}
+                    <MetricChip
+                      label="Forecast"
+                      value={`${req.forecast_demand.toLocaleString()} units`}
+                      accent="var(--accent-cyan)"
+                    />
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
+                      On hand: {req.current_stock.toLocaleString()} · Safety buffer: {req.safety_stock.toLocaleString()} · In transit: {req.in_transit.toLocaleString()}
+                    </span>
                     {deltaStr && (
                       <MetricChip
-                        label="Sales"
-                        value={`${deltaStr} (past qtr)`}
+                        label="Demand trend"
+                        value={`${deltaStr} vs prior quarter`}
                         accent={deltaVal! > 0 ? 'var(--accent-green)' : 'var(--accent-amber)'}
                       />
                     )}
-                    {editingDemand ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {editingDemand && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, width: '100%' }}>
                         <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
-                          Safety: {req.safety_stock} → Order Qty:
+                          Override order qty:
                         </span>
                         <input
                           type="number"
@@ -519,7 +521,7 @@ export default function PipelinePage() {
                           value={editedQtys[req.sku] ?? req.final_order_qty ?? req.net_qty}
                           onChange={e => setEditedQtys(prev => ({ ...prev, [req.sku]: parseInt(e.target.value) || 0 }))}
                           style={{
-                            width: 80,
+                            width: 90,
                             fontSize: 12,
                             fontFamily: 'JetBrains Mono, monospace',
                             fontWeight: 600,
@@ -533,15 +535,10 @@ export default function PipelinePage() {
                         />
                         {req.moq > 1 && (
                           <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
-                            (MOQ: {req.moq})
+                            min order: {req.moq}
                           </span>
                         )}
                       </div>
-                    ) : (
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
-                        Safety: {req.safety_stock} → New Order: {req.net_qty} → Final: {req.final_order_qty ?? req.net_qty}
-                        {req.moq > 1 && <span style={{ color: 'var(--text-muted)' }}> (MOQ: {req.moq})</span>}
-                      </span>
                     )}
                   </div>
 
