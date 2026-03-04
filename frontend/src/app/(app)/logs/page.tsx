@@ -49,14 +49,13 @@ export default function LogsPage() {
 
   return (
     <div style={{ maxWidth: 1000 }}>
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
           <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
             Decision Log
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
-            Full audit trail — every agent action with inputs, outputs, and rationale.
+            Full audit trail &mdash; every agent action with inputs, outputs, and rationale.
           </p>
         </div>
         <button onClick={fetchLogs} className="btn-outline" style={{ marginTop: 4 }}>
@@ -64,7 +63,6 @@ export default function LogsPage() {
         </button>
       </div>
 
-      {/* Filter pills */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
         {AGENTS.map(a => {
           const count = a === 'All' ? logs.length : logs.filter(l => l.agent_name === a).length;
@@ -74,15 +72,12 @@ export default function LogsPage() {
               key={a}
               onClick={() => setFilter(a)}
               style={{
-                padding: '6px 14px',
-                borderRadius: 100,
-                fontSize: 12,
+                padding: '6px 14px', borderRadius: 100, fontSize: 12,
                 fontWeight: isActive ? 600 : 400,
                 border: `1px solid ${isActive ? 'var(--accent-blue)' : 'var(--border)'}`,
                 background: isActive ? 'var(--accent-blue-glow)' : 'transparent',
                 color: isActive ? 'var(--accent-blue)' : 'var(--text-muted)',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
+                cursor: 'pointer', transition: 'all 0.15s',
               }}
             >
               {a}
@@ -96,7 +91,7 @@ export default function LogsPage() {
 
       {loading ? (
         <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-          Loading decision log…
+          Loading decision log\u2026
         </div>
       ) : filtered.length === 0 ? (
         <div className="card" style={{ padding: 40, textAlign: 'center' }}>
@@ -104,7 +99,7 @@ export default function LogsPage() {
             No log entries yet.
           </p>
           <a href="/pipeline" style={{ color: 'var(--accent-blue)', fontSize: 13, textDecoration: 'none' }}>
-            Run a pipeline to generate audit records →
+            Run a pipeline to generate audit records &rarr;
           </a>
         </div>
       ) : (
@@ -121,10 +116,9 @@ export default function LogsPage() {
                     padding: '14px 18px', cursor: 'pointer',
                   }}
                 >
-                  {/* Confidence */}
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 44, flexShrink: 0 }}>
                     <div className="mono" style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
-                      {confPct ?? '—'}
+                      {confPct ?? '\u2014'}
                     </div>
                     <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>conf%</div>
                     {confPct != null && (
@@ -141,7 +135,6 @@ export default function LogsPage() {
                     )}
                   </div>
 
-                  {/* Content */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
                       <span className={`badge ${AGENT_COLORS[entry.agent_name] || 'badge-blue'}`}>
@@ -153,7 +146,7 @@ export default function LogsPage() {
                         </span>
                       )}
                       <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                        run: {entry.run_id?.slice(0, 8)}…
+                        run: {entry.run_id?.slice(0, 8)}\u2026
                       </span>
                       <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
                         {new Date(entry.timestamp).toLocaleString()}
@@ -165,11 +158,10 @@ export default function LogsPage() {
                   </div>
 
                   <span style={{ color: 'var(--text-muted)', fontSize: 12, flexShrink: 0 }}>
-                    {isExpanded ? '▲' : '▼'}
+                    {isExpanded ? '\u25B2' : '\u25BC'}
                   </span>
                 </div>
 
-                {/* Expanded: inputs + outputs */}
                 {isExpanded && (
                   <div style={{ borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
                     <div style={{ padding: 16, borderRight: '1px solid var(--border)' }}>

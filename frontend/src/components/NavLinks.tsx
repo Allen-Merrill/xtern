@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Dashboard', icon: '◆' },
+  { href: '/dashboard', label: 'Dashboard', icon: '◆' },
   { href: '/pipeline', label: 'Run Pipeline', icon: '▷' },
   { href: '/approvals', label: 'Approval Queue', icon: '◎' },
   { href: '/logs', label: 'Decision Log', icon: '≡' },
@@ -18,9 +18,7 @@ export default function NavLinks() {
   return (
     <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {NAV_ITEMS.map(item => {
-        const isActive = item.href === '/'
-          ? pathname === '/'
-          : pathname.startsWith(item.href);
+        const isActive = pathname.startsWith(item.href);
         return (
           <Link
             key={item.href}

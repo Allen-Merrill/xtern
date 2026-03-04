@@ -181,7 +181,6 @@ export default function PipelinePage() {
 
   return (
     <div style={{ maxWidth: 1000 }}>
-      {/* Header */}
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
           Run Pipeline
@@ -191,14 +190,11 @@ export default function PipelinePage() {
         </p>
       </div>
 
-      {/* Config step */}
       {step === 'idle' && (
         <div className="card" style={{ padding: 24, marginBottom: 20 }}>
           <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 20 }}>
             Pipeline Configuration
           </h2>
-
-          {/* Horizon */}
           <div style={{ marginBottom: 20 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', marginBottom: 8 }}>
               Planning Horizon
@@ -210,8 +206,6 @@ export default function PipelinePage() {
               <option value={6}>6 months</option>
             </select>
           </div>
-
-          {/* SKU selection */}
           <div style={{ marginBottom: 24 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', marginBottom: 8 }}>
               SKU Selection
@@ -225,15 +219,11 @@ export default function PipelinePage() {
                   key={sku}
                   onClick={() => toggleSku(sku)}
                   style={{
-                    padding: '6px 14px',
-                    borderRadius: 100,
-                    fontSize: 12,
-                    fontWeight: 500,
+                    padding: '6px 14px', borderRadius: 100, fontSize: 12, fontWeight: 500,
                     border: `1px solid ${selectedSkus.includes(sku) ? 'var(--accent-blue)' : 'var(--border)'}`,
                     background: selectedSkus.includes(sku) ? 'var(--accent-blue-glow)' : 'transparent',
                     color: selectedSkus.includes(sku) ? 'var(--accent-blue)' : 'var(--text-muted)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s',
+                    cursor: 'pointer', transition: 'all 0.15s',
                   }}
                 >
                   {sku}
@@ -258,14 +248,12 @@ export default function PipelinePage() {
               </p>
             )}
           </div>
-
           <button onClick={handleStart} className="btn-primary">
             Start Pipeline
           </button>
         </div>
       )}
 
-      {/* Progress stepper */}
       {step !== 'idle' && step !== 'error' && (
         <div className="card" style={{ padding: '16px 24px', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -281,7 +269,7 @@ export default function PipelinePage() {
                     color: i <= stepIndex ? 'white' : 'var(--text-muted)',
                     transition: 'all 0.3s',
                   }}>
-                    {i < stepIndex ? '✓' : i + 1}
+                    {i < stepIndex ? '\u2713' : i + 1}
                   </div>
                   <span style={{
                     fontSize: 11, marginTop: 6, textAlign: 'center', width: 80,
@@ -304,7 +292,6 @@ export default function PipelinePage() {
         </div>
       )}
 
-      {/* Running spinner */}
       {isRunning && (
         <div className="card" style={{ padding: 28, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 16 }}>
           <div className="animate-spin" style={{
@@ -313,13 +300,12 @@ export default function PipelinePage() {
             borderTopColor: 'var(--accent-blue)',
           }} />
           <div>
-            <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>Agent running…</p>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>This may take 10–30 seconds</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>Agent running\u2026</p>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>This may take 10\u201330 seconds</p>
           </div>
         </div>
       )}
 
-      {/* Step 1 — Demand Analyst Results */}
       {step === 'review_demand' && (
         <div className="card" style={{ padding: 24, marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
@@ -335,7 +321,6 @@ export default function PipelinePage() {
               {netRequirements.length} SKUs need replenishment
             </span>
           </div>
-
           <div style={{ overflowX: 'auto', borderRadius: 8, border: '1px solid var(--border)', marginBottom: 20 }}>
             <table>
               <thead>
@@ -364,14 +349,12 @@ export default function PipelinePage() {
               </tbody>
             </table>
           </div>
-
           <button onClick={handleRunSupplier} className="btn-primary">
-            Continue to Supplier Selection →
+            Continue to Supplier Selection &rarr;
           </button>
         </div>
       )}
 
-      {/* Step 2 — Supplier Selector Results */}
       {step === 'review_supplier' && (
         <div className="card" style={{ padding: 24, marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
@@ -388,7 +371,6 @@ export default function PipelinePage() {
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
             AI has recommended a supplier for each SKU. Use the dropdown to override any selection.
           </p>
-
           <div style={{ overflowX: 'auto', borderRadius: 8, border: '1px solid var(--border)', marginBottom: 20 }}>
             <table>
               <thead>
@@ -449,14 +431,12 @@ export default function PipelinePage() {
               </tbody>
             </table>
           </div>
-
           <button onClick={handleRunContainer} className="btn-primary">
-            Continue to Container Optimization →
+            Continue to Container Optimization &rarr;
           </button>
         </div>
       )}
 
-      {/* Step 3 — Container Optimizer Results */}
       {step === 'review_container' && containerPlan && (
         <div className="card" style={{ padding: 24, marginBottom: 20 }}>
           <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
@@ -467,7 +447,6 @@ export default function PipelinePage() {
               {containerRationale}
             </p>
           )}
-
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
             {[
               { label: 'Container Type', value: containerPlan.container_type, accent: 'var(--accent-blue)' },
@@ -476,10 +455,8 @@ export default function PipelinePage() {
               { label: 'Est. Freight', value: `$${containerPlan.estimated_freight_usd?.toLocaleString()}`, accent: 'var(--accent-amber)' },
             ].map(card => (
               <div key={card.label} style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 10,
-                padding: '14px 16px',
+                background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                borderRadius: 10, padding: '14px 16px',
               }}>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{card.label}</p>
                 <p className="mono" style={{ fontSize: 22, fontWeight: 700, color: card.accent, marginTop: 4 }}>
@@ -488,14 +465,12 @@ export default function PipelinePage() {
               </div>
             ))}
           </div>
-
           <button onClick={handleRunPO} className="btn-primary">
-            Continue to PO Compilation →
+            Continue to PO Compilation &rarr;
           </button>
         </div>
       )}
 
-      {/* Step 4 — PO Compiler Results */}
       {(step === 'review_po' || step === 'done') && poNumber && (
         <div className="card" style={{ padding: 24, marginBottom: 20 }}>
           <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
@@ -506,7 +481,6 @@ export default function PipelinePage() {
               {poRationale}
             </p>
           )}
-
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
             {[
               { label: 'PO Number', value: poNumber, accent: 'var(--text-primary)', mono: true },
@@ -519,44 +493,35 @@ export default function PipelinePage() {
               },
             ].map(card => (
               <div key={card.label} style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 10,
-                padding: '14px 16px',
+                background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                borderRadius: 10, padding: '14px 16px',
               }}>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{card.label}</p>
                 <p className={card.mono ? 'mono' : ''} style={{
-                  fontSize: card.mono ? 18 : 16,
-                  fontWeight: 700,
-                  color: card.accent,
-                  marginTop: 4,
-                  textTransform: 'capitalize',
+                  fontSize: card.mono ? 18 : 16, fontWeight: 700, color: card.accent,
+                  marginTop: 4, textTransform: 'capitalize',
                 }}>
                   {card.value}
                 </p>
               </div>
             ))}
           </div>
-
           {step === 'review_po' && (
             <div style={{ display: 'flex', gap: 12 }}>
               <button onClick={() => handleApproval('approve')} className="btn-success">
-                ✓ Approve PO
+                \u2713 Approve PO
               </button>
               <button onClick={() => handleApproval('reject')} className="btn-danger">
-                ✗ Reject PO
+                \u2717 Reject PO
               </button>
             </div>
           )}
           {step === 'done' && (
             <div style={{
-              borderRadius: 8,
-              padding: '12px 16px',
-              fontSize: 13,
-              fontWeight: 600,
+              borderRadius: 8, padding: '12px 16px', fontSize: 13, fontWeight: 600,
               background: approvalStatus === 'approved' ? 'var(--accent-green-glow)' : 'var(--accent-red-glow)',
               color: approvalStatus === 'approved' ? 'var(--accent-green)' : 'var(--accent-red)',
-              border: `1px solid ${approvalStatus === 'approved' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`,
+              border: `1px solid ${approvalStatus === 'approved' ? 'rgba(93,153,117,0.2)' : 'rgba(157,92,99,0.2)'}`,
             }}>
               PO {poNumber} has been {approvalStatus}.{' '}
               {approvalStatus === 'approved' && 'View it in the Approval Queue.'}
@@ -565,33 +530,25 @@ export default function PipelinePage() {
         </div>
       )}
 
-      {/* Error state */}
       {step === 'error' && error && (
-        <div className="card" style={{ padding: 24, marginBottom: 20, border: '1px solid rgba(239,68,68,0.2)' }}>
+        <div className="card" style={{ padding: 24, marginBottom: 20, border: '1px solid rgba(157,92,99,0.2)' }}>
           <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--accent-red)', marginBottom: 12 }}>
             Pipeline Error
           </h2>
           <pre style={{
-            fontSize: 12,
-            background: 'var(--accent-red-glow)',
-            color: 'var(--accent-red)',
-            border: '1px solid rgba(239,68,68,0.15)',
-            borderRadius: 8,
-            padding: 14,
-            marginBottom: 16,
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
+            fontSize: 12, background: 'var(--accent-red-glow)', color: 'var(--accent-red)',
+            border: '1px solid rgba(157,92,99,0.15)', borderRadius: 8, padding: 14,
+            marginBottom: 16, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
             fontFamily: 'JetBrains Mono, monospace',
           }}>
             {error}
           </pre>
           <button onClick={resetPipeline} className="btn-outline">
-            ← Start Over
+            &larr; Start Over
           </button>
         </div>
       )}
 
-      {/* Start over link */}
       {step !== 'idle' && step !== 'error' && (
         <button
           onClick={resetPipeline}
@@ -600,7 +557,7 @@ export default function PipelinePage() {
             fontSize: 13, color: 'var(--text-muted)', textDecoration: 'underline',
           }}
         >
-          ← Start over with new configuration
+          &larr; Start over with new configuration
         </button>
       )}
     </div>

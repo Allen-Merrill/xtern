@@ -8,6 +8,12 @@ function cn(...classes: Array<string | undefined | null | false>) {
   return classes.filter(Boolean).join(" ");
 }
 
+function getCPUBarColor(pct: number) {
+  if (pct >= 90) return "#9D5C63";
+  if (pct >= 70) return "#C4883A";
+  return "#5D9975";
+}
+
 export interface ServerItem {
   id: string;
   number: string;
@@ -654,10 +660,4 @@ export function ServerManagementTable({
       </AnimatePresence>
     </div>
   );
-
-  function getCPUBarColor(pct: number) {
-    if (pct >= 90) return "#ef4444";
-    if (pct >= 70) return "#f59e0b";
-    return "#10b981";
-  }
 }

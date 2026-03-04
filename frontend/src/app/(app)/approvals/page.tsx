@@ -52,7 +52,6 @@ export default function ApprovalsPage() {
   const fetchPos = async () => {
     setLoading(true);
     try {
-      // Fetch both draft and pending_approval POs
       const [r1, r2] = await Promise.all([
         fetch(`${BACKEND_URL}/pipeline/pos?status=draft&limit=50`).then(r => r.json()),
         fetch(`${BACKEND_URL}/pipeline/pos?status=pending_approval&limit=50`).then(r => r.json()),
@@ -94,7 +93,6 @@ export default function ApprovalsPage() {
 
   return (
     <div style={{ maxWidth: 1000 }}>
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
           <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
@@ -109,17 +107,12 @@ export default function ApprovalsPage() {
         </button>
       </div>
 
-      {/* Toast */}
       {toast && (
         <div style={{
-          marginBottom: 16,
-          padding: '12px 16px',
-          borderRadius: 8,
-          fontSize: 13,
-          fontWeight: 500,
+          marginBottom: 16, padding: '12px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500,
           background: toast.ok ? 'var(--accent-green-glow)' : 'var(--accent-red-glow)',
           color: toast.ok ? 'var(--accent-green)' : 'var(--accent-red)',
-          border: `1px solid ${toast.ok ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`,
+          border: `1px solid ${toast.ok ? 'rgba(93,153,117,0.2)' : 'rgba(157,92,99,0.2)'}`,
         }}>
           {toast.msg}
         </div>
@@ -127,7 +120,7 @@ export default function ApprovalsPage() {
 
       {loading ? (
         <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
-          <div style={{ fontSize: 13 }}>Loading purchase orders…</div>
+          <div style={{ fontSize: 13 }}>Loading purchase orders\u2026</div>
         </div>
       ) : pos.length === 0 ? (
         <div className="card" style={{ padding: 40, textAlign: 'center' }}>
@@ -135,7 +128,7 @@ export default function ApprovalsPage() {
             No pending purchase orders.
           </p>
           <a href="/pipeline" style={{ color: 'var(--accent-blue)', fontSize: 13, textDecoration: 'none' }}>
-            Run a pipeline to generate a PO →
+            Run a pipeline to generate a PO &rarr;
           </a>
         </div>
       ) : (
@@ -144,7 +137,6 @@ export default function ApprovalsPage() {
             const isExpanded = selectedPo === po.po_number;
             return (
               <div key={po.po_number} className="card" style={{ overflow: 'hidden' }}>
-                {/* PO header row */}
                 <div
                   onClick={() => setSelectedPo(isExpanded ? null : po.po_number)}
                   style={{
@@ -158,7 +150,7 @@ export default function ApprovalsPage() {
                         {po.po_number}
                       </p>
                       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                        {new Date(po.created_at).toLocaleString()} · by {po.created_by}
+                        {new Date(po.created_at).toLocaleString()} &middot; by {po.created_by}
                       </p>
                     </div>
                   </div>
@@ -179,32 +171,24 @@ export default function ApprovalsPage() {
                       {po.status.replace('_', ' ')}
                     </span>
                     <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>
-                      {isExpanded ? '▲' : '▼'}
+                      {isExpanded ? '\u25B2' : '\u25BC'}
                     </span>
                   </div>
                 </div>
 
-                {/* Expanded detail */}
                 {isExpanded && (
                   <div style={{ borderTop: '1px solid var(--border)', padding: '20px 20px 24px' }}>
-                    {/* AI notes */}
                     {po.notes && (
                       <div style={{
-                        marginBottom: 20,
-                        padding: '12px 16px',
-                        background: 'var(--accent-blue-glow)',
-                        border: '1px solid rgba(59,130,246,0.15)',
-                        borderRadius: 8,
-                        fontSize: 13,
-                        color: 'var(--text-secondary)',
-                        lineHeight: 1.5,
+                        marginBottom: 20, padding: '12px 16px',
+                        background: 'var(--accent-blue-glow)', border: '1px solid rgba(43,65,98,0.15)',
+                        borderRadius: 8, fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5,
                       }}>
                         <span style={{ fontWeight: 600, color: 'var(--accent-blue)' }}>AI Summary: </span>
                         {po.notes}
                       </div>
                     )}
 
-                    {/* Container plan */}
                     {po.container_plan && (
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 }}>
                         {[
@@ -214,10 +198,8 @@ export default function ApprovalsPage() {
                           { label: 'Freight Est.', value: `$${po.container_plan.estimated_freight_usd?.toLocaleString()}` },
                         ].map(card => (
                           <div key={card.label} style={{
-                            background: 'var(--bg-surface)',
-                            border: '1px solid var(--border)',
-                            borderRadius: 8,
-                            padding: '10px 14px',
+                            background: 'var(--bg-surface)', border: '1px solid var(--border)',
+                            borderRadius: 8, padding: '10px 14px',
                           }}>
                             <p style={{ fontSize: 10, color: 'var(--text-muted)' }}>{card.label}</p>
                             <p className="mono" style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginTop: 3 }}>
@@ -228,7 +210,6 @@ export default function ApprovalsPage() {
                       </div>
                     )}
 
-                    {/* Line items table */}
                     <div style={{ overflowX: 'auto', borderRadius: 8, border: '1px solid var(--border)', marginBottom: 20 }}>
                       <table>
                         <thead>
@@ -264,7 +245,6 @@ export default function ApprovalsPage() {
                       </table>
                     </div>
 
-                    {/* Approval form */}
                     <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20 }}>
                       <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 14 }}>
                         Manager Approval
@@ -274,18 +254,14 @@ export default function ApprovalsPage() {
                           <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>
                             Reviewer Name
                           </label>
-                          <input
-                            value={reviewer}
-                            onChange={e => setReviewer(e.target.value)}
-                            style={{ width: 200 }}
-                          />
+                          <input value={reviewer} onChange={e => setReviewer(e.target.value)} style={{ width: 200 }} />
                         </div>
                         <div style={{ flex: 1 }}>
                           <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>
                             Notes (optional)
                           </label>
                           <input
-                            placeholder="Approval notes or rejection reason…"
+                            placeholder="Approval notes or rejection reason\u2026"
                             value={notes}
                             onChange={e => setNotes(e.target.value)}
                             style={{ width: '100%' }}
@@ -293,19 +269,11 @@ export default function ApprovalsPage() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: 10 }}>
-                        <button
-                          onClick={() => handleAction(po, 'approve')}
-                          disabled={submitting}
-                          className="btn-success"
-                        >
-                          ✓ Approve PO
+                        <button onClick={() => handleAction(po, 'approve')} disabled={submitting} className="btn-success">
+                          \u2713 Approve PO
                         </button>
-                        <button
-                          onClick={() => handleAction(po, 'reject')}
-                          disabled={submitting}
-                          className="btn-danger"
-                        >
-                          ✗ Reject PO
+                        <button onClick={() => handleAction(po, 'reject')} disabled={submitting} className="btn-danger">
+                          \u2717 Reject PO
                         </button>
                       </div>
                     </div>
