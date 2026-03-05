@@ -19,6 +19,7 @@ function LoginForm() {
     try {
       await signIn(email, password);
       const next = searchParams.get('next') ?? '/pipeline';
+      router.refresh();
       router.push(next);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Sign in failed.');
