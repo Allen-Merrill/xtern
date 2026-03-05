@@ -31,6 +31,8 @@ server.tool('create_draft_po', 'Creates a draft Purchase Order with line items i
         num_containers: z.number(),
         total_weight_kg: z.number(),
         total_cbm: z.number(),
+        volume_utilisation_pct: z.number().optional(),
+        weight_utilisation_pct: z.number().optional(),
         binding_utilisation_pct: z.number(),
         estimated_freight_usd: z.number(),
     }).optional().describe('Container plan from logistics agent'),

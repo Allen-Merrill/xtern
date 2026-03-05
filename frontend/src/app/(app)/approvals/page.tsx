@@ -193,8 +193,8 @@ export default function ApprovalsPage() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 }}>
                         {[
                           { label: 'Container', value: `${po.container_plan.num_containers}x ${po.container_plan.container_type}` },
-                          { label: 'Volume Util.', value: `${po.container_plan.volume_utilisation_pct?.toFixed(1)}%` },
-                          { label: 'Weight Util.', value: `${po.container_plan.weight_utilisation_pct?.toFixed(1)}%` },
+                          { label: 'Volume Util.', value: po.container_plan.volume_utilisation_pct != null ? `${po.container_plan.volume_utilisation_pct.toFixed(1)}%` : `${po.container_plan.binding_utilisation_pct?.toFixed(1)}%` },
+                          { label: 'Weight Util.', value: po.container_plan.weight_utilisation_pct != null ? `${po.container_plan.weight_utilisation_pct.toFixed(1)}%` : `${po.container_plan.binding_utilisation_pct?.toFixed(1)}%` },
                           { label: 'Freight Est.', value: `$${po.container_plan.estimated_freight_usd?.toLocaleString()}` },
                         ].map(card => (
                           <div key={card.label} style={{

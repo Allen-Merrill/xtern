@@ -1,11 +1,14 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { InfiniteSlider } from '@/components/ui/infinite-slider'
 import { ProgressiveBlur } from '@/components/ui/progressive-blur'
 import { cn } from '@/lib/utils'
 import { Menu, X, Brain, Target, Package, FileCheck, ShieldCheck, Users, ArrowRight, Zap } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
+import { signOut } from '@/lib/auth'
 
 /* ── Logo ────────────────────────────────────────────────────── */
 
@@ -29,6 +32,14 @@ const menuItems = [
 
 const HeroHeader = () => {
     const [menuState, setMenuState] = React.useState(false)
+    const { user, displayName } = useAuth()
+    const router = useRouter()
+
+    const handleSignOut = async () => {
+        await signOut()
+        router.push('/login')
+    }
+
     return (
         <header>
             <nav
@@ -79,16 +90,34 @@ const HeroHeader = () => {
                                 </ul>
                             </div>
                             <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-                                <Button asChild variant="outline" size="sm" className="border-[rgba(133,135,124,0.3)] bg-transparent text-[#FFFACC] hover:bg-[#2F2504] hover:text-[#FFFACC]">
-                                    <Link href="/login">
-                                        <span>Login</span>
-                                    </Link>
-                                </Button>
-                                <Button asChild size="sm" className="bg-gradient-to-r from-[#2B4162] to-[#9D5C63] text-[#FFFACC] hover:opacity-90">
-                                    <Link href="/pipeline">
-                                        <span>Open Dashboard</span>
-                                    </Link>
-                                </Button>
+                                {user ? (
+                                    <>
+                                        <span className="flex items-center px-3 text-sm text-[#85877C]">
+                                            {displayName}
+                                        </span>
+                                        <Button variant="outline" size="sm" onClick={handleSignOut} className="border-[rgba(133,135,124,0.3)] bg-transparent text-[#FFFACC] hover:bg-[#2F2504] hover:text-[#FFFACC]">
+                                            Sign out
+                                        </Button>
+                                        <Button asChild size="sm" className="bg-gradient-to-r from-[#2B4162] to-[#9D5C63] text-[#FFFACC] hover:opacity-90">
+                                            <Link href="/pipeline">
+                                                <span>Open Dashboard</span>
+                                            </Link>
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Button asChild variant="outline" size="sm" className="border-[rgba(133,135,124,0.3)] bg-transparent text-[#FFFACC] hover:bg-[#2F2504] hover:text-[#FFFACC]">
+                                            <Link href="/login">
+                                                <span>Login</span>
+                                            </Link>
+                                        </Button>
+                                        <Button asChild size="sm" className="bg-gradient-to-r from-[#2B4162] to-[#9D5C63] text-[#FFFACC] hover:opacity-90">
+                                            <Link href="/pipeline">
+                                                <span>Open Dashboard</span>
+                                            </Link>
+                                        </Button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
