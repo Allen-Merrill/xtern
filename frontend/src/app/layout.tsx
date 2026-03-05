@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from '@/components/providers';
+import SidebarShell from '@/components/SidebarShell';
 
 export const metadata: Metadata = {
   title: 'ProcureAI — Supply Chain PO Automation',
