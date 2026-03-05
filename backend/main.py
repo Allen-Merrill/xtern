@@ -257,12 +257,26 @@ async def start_pipeline(request: PipelineRunRequest):
     if state.get('error'):
         raise HTTPException(status_code=500, detail=state['error'])
 
+    net_requirements = state.get('net_requirements', [])
+    if not net_requirements:
+        activity = state.get('agent_activity', {})
+        deducted = (activity.get('DemandAnalyst') or {}).get('details', {}).get('open_po_skus_deducted', [])
+        if deducted:
+            detail = (
+                f'No new orders needed — existing open POs already cover all replenishment requirements '
+                f'for {len(deducted)} SKU(s): {", ".join(deducted[:5])}{"..." if len(deducted) > 5 else ""}. '
+                f'Approve or reject those POs before starting a new run.'
+            )
+        else:
+            detail = 'No SKUs need replenishment at this time.'
+        raise HTTPException(status_code=400, detail=detail)
+
     return {
         'run_id': run_id,
         'agent': 'demand_analyst',
         'status': 'awaiting_input',
         'next_agent': 'supplier_selector',
-        'net_requirements': state.get('net_requirements', []),
+        'net_requirements': net_requirements,
         'demand_rationale': state.get('demand_rationale'),
         'demand_confidence': state.get('demand_confidence'),
         'agent_activity': state.get('agent_activity', {}),
@@ -280,6 +294,7 @@ class SupplierOverride(BaseModel):
 
 class ContinueRequest(BaseModel):
     supplier_overrides: Optional[List[SupplierOverride]] = None
+    net_requirements_overrides: Optional[List[dict]] = None
 
 
 @app.post('/pipeline/{run_id}/continue/{next_agent}')
@@ -292,6 +307,23 @@ async def continue_pipeline(run_id: str, next_agent: str, request: ContinueReque
     state = pipeline_states.get(run_id)
     if not state:
         raise HTTPException(status_code=404, detail='Run ID not found. Start a new pipeline first.')
+
+    # Inject manually edited demand quantities before any downstream agent runs
+    if request and request.net_requirements_overrides:
+        overrides_by_sku = {r['sku']: r for r in request.net_requirements_overrides}
+        updated_reqs = []
+        for req in state.get('net_requirements', []):
+            sku = req.get('sku')
+            if sku in overrides_by_sku:
+                o = overrides_by_sku[sku]
+                updated_reqs.append({
+                    **req,
+                    'net_qty': o.get('net_qty', req.get('net_qty')),
+                    'final_order_qty': o.get('final_order_qty', req.get('final_order_qty')),
+                })
+            else:
+                updated_reqs.append(req)
+        state['net_requirements'] = updated_reqs
 
     # Inject user's supplier picks before container optimizer runs
     if next_agent == 'container_optimizer' and request and request.supplier_overrides:

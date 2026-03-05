@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   startPipeline,
   continueAgent,
@@ -102,6 +103,19 @@ export default function PipelinePage() {
   const [poRationale, setPoRationale] = useState('');
   const [agentActivity, setAgentActivity] = useState<Record<string, AgentActivityEntry>>({});
   const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
+  const [existingDraftPos, setExistingDraftPos] = useState<{ po_number: string; total_usd: number }[]>([]);
+  const [editingDemand, setEditingDemand] = useState(false);
+  const [editedQtys, setEditedQtys] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+    fetch(`${backendUrl}/pipeline/pos?status=draft&limit=10`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.purchase_orders?.length) setExistingDraftPos(data.purchase_orders);
+      })
+      .catch(() => {});
+  }, [step]);
 
   const toggleSku = (sku: string) =>
     setSelectedSkus(prev => prev.includes(sku) ? prev.filter(s => s !== sku) : [...prev, sku]);
@@ -132,7 +146,7 @@ export default function PipelinePage() {
     if (!runId) return;
     setStep('running_supplier');
     try {
-      const data = await continueAgent(runId, 'supplier_selector');
+      const data = await continueAgent(runId, 'supplier_selector', undefined, netRequirements);
       setSupplierSelections(data.supplier_selections || []);
       setSupplierRationale(data.supplier_rationale || '');
       setSupplierConcerns(data.supplier_concerns || []);
@@ -161,7 +175,7 @@ export default function PipelinePage() {
         lead_time_days: s.lead_time_days!,
         score: s.score!,
       }));
-      const data = await continueAgent(runId, 'container_optimizer', overrides);
+      const data = await continueAgent(runId, 'container_optimizer', overrides, netRequirements);
       setContainerPlan(data.container_plan || null);
       setContainerRationale(data.container_rationale || '');
       setAgentActivity(prev => ({ ...prev, ...data.agent_activity }));
@@ -176,7 +190,7 @@ export default function PipelinePage() {
     if (!runId) return;
     setStep('running_po');
     try {
-      const data = await continueAgent(runId, 'po_compiler');
+      const data = await continueAgent(runId, 'po_compiler', undefined, netRequirements);
       setPoNumber(data.po_number || null);
       setPoTotal(data.po_total_usd || null);
       setPoRationale(data.po_rationale || '');
@@ -233,6 +247,27 @@ export default function PipelinePage() {
         </p>
       </div>
 
+      {/* Existing draft POs warning */}
+      {step === 'idle' && existingDraftPos.length > 0 && (
+        <div style={{
+          display: 'flex', gap: 12, alignItems: 'flex-start',
+          padding: '14px 18px', borderRadius: 10, marginBottom: 16,
+          background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)',
+        }}>
+          <span style={{ fontSize: 16, color: 'var(--accent-amber)', marginTop: 1 }}>⚠</span>
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent-amber)', marginBottom: 4 }}>
+              {existingDraftPos.length} draft PO{existingDraftPos.length > 1 ? 's' : ''} already exist
+            </p>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
+              {existingDraftPos.map(p => `${p.po_number} ($${p.total_usd?.toLocaleString()})`).join(', ')}.{' '}
+              Starting a new pipeline will not re-order SKUs already covered. Review or approve existing POs first.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Config step */}
       {step === 'idle' && (
         <div className="card" style={{ padding: 24, marginBottom: 20 }}>
           <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 20 }}>
@@ -345,8 +380,13 @@ export default function PipelinePage() {
             borderTopColor: 'var(--accent-blue)',
           }} />
           <div>
-            <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>Agent running\u2026</p>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>This may take 10\u201330 seconds</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+              {step === 'running_demand' && 'Running Demand Analyst\u2026'}
+              {step === 'running_supplier' && 'Running Supplier Selector\u2026'}
+              {step === 'running_container' && 'Running Container Optimizer\u2026'}
+              {step === 'running_po' && 'Running PO Compiler\u2026'}
+            </p>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>This may take 10–30 seconds</p>
           </div>
         </div>
       )}
@@ -363,9 +403,49 @@ export default function PipelinePage() {
                 </p>
               )}
             </div>
-            <span className="badge badge-blue">
-              {netRequirements.length} SKUs need replenishment
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span className="badge badge-blue">
+                {netRequirements.length} SKUs need replenishment
+              </span>
+              {!editingDemand ? (
+                <button
+                  onClick={() => {
+                    const initial: Record<string, number> = {};
+                    netRequirements.forEach(r => { initial[r.sku] = r.final_order_qty ?? r.net_qty; });
+                    setEditedQtys(initial);
+                    setEditingDemand(true);
+                  }}
+                  className="btn-outline"
+                  style={{ fontSize: 12, padding: '4px 12px' }}
+                >
+                  Edit Requirements
+                </button>
+              ) : (
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => {
+                      setNetRequirements(prev => prev.map(r => ({
+                        ...r,
+                        final_order_qty: editedQtys[r.sku] ?? r.final_order_qty ?? r.net_qty,
+                        net_qty: editedQtys[r.sku] ?? r.net_qty,
+                      })));
+                      setEditingDemand(false);
+                    }}
+                    className="btn-success"
+                    style={{ fontSize: 12, padding: '4px 12px' }}
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    onClick={() => setEditingDemand(false)}
+                    className="btn-outline"
+                    style={{ fontSize: 12, padding: '4px 12px' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Compact color-coded SKU list */}
@@ -388,7 +468,7 @@ export default function PipelinePage() {
                   padding: '12px 16px',
                 }}>
                   {/* Line 1: urgency dot + main summary */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
                     <div style={{
                       width: 8, height: 8, borderRadius: '50%',
                       background: urgColor,
@@ -398,40 +478,68 @@ export default function PipelinePage() {
                     <span className="mono" style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 13 }}>
                       {req.sku}
                     </span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>→</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>—</span>
                     <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-                      short by <strong style={{ color: urgColor }}>{req.net_qty.toLocaleString()}</strong> qty
-                    </span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>→</span>
-                    <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-                      considering <strong>{req.safety_stock}</strong> safety stock already have
+                      Order <strong style={{ color: urgColor }}>{(req.final_order_qty ?? req.net_qty).toLocaleString()} units</strong>
+                      {req.moq > 1 && <span style={{ color: 'var(--text-muted)', fontSize: 11 }}> (min {req.moq})</span>}
                     </span>
                     {req.need_by_date && req.need_by_date !== 'N/A' && (
                       <>
-                        <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>→</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>·</span>
                         <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-                          need by <strong style={{ color: urgColor }}>{req.need_by_date}</strong>
+                          stock runs out <strong style={{ color: urgColor }}>{req.need_by_date}</strong>
                         </span>
                       </>
                     )}
                   </div>
 
-                  {/* Line 2: metrics chips */}
+                  {/* Line 2: key numbers + trend chip */}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', paddingLeft: 18 }}>
-                    {req.uf_qty_in != null && (
-                      <MetricChip label="UF Qty In" value={req.uf_qty_in.toLocaleString()} accent="var(--accent-cyan)" />
-                    )}
+                    <MetricChip
+                      label="Forecast"
+                      value={`${req.forecast_demand.toLocaleString()} units`}
+                      accent="var(--accent-cyan)"
+                    />
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
+                      On hand: {req.current_stock.toLocaleString()} · Safety buffer: {req.safety_stock.toLocaleString()} · In transit: {req.in_transit.toLocaleString()}
+                    </span>
                     {deltaStr && (
                       <MetricChip
-                        label="Sales"
-                        value={`${deltaStr} (past qtr)`}
+                        label="Demand trend"
+                        value={`${deltaStr} vs prior quarter`}
                         accent={deltaVal! > 0 ? 'var(--accent-green)' : 'var(--accent-amber)'}
                       />
                     )}
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
-                      Safety: {req.safety_stock} → New Order: {req.net_qty} → Final: {req.final_order_qty ?? req.net_qty}
-                      {req.moq > 1 && <span style={{ color: 'var(--text-muted)' }}> (MOQ: {req.moq})</span>}
-                    </span>
+                    {editingDemand && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, width: '100%' }}>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
+                          Override order qty:
+                        </span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={editedQtys[req.sku] ?? req.final_order_qty ?? req.net_qty}
+                          onChange={e => setEditedQtys(prev => ({ ...prev, [req.sku]: parseInt(e.target.value) || 0 }))}
+                          style={{
+                            width: 90,
+                            fontSize: 12,
+                            fontFamily: 'JetBrains Mono, monospace',
+                            fontWeight: 600,
+                            color: urgColor,
+                            background: 'var(--bg-primary)',
+                            border: `1px solid ${urgColor}60`,
+                            borderRadius: 4,
+                            padding: '2px 6px',
+                            outline: 'none',
+                          }}
+                        />
+                        {req.moq > 1 && (
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
+                            min order: {req.moq}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Line 3: open PO warning */}
@@ -697,12 +805,9 @@ export default function PipelinePage() {
           </div>
           {step === 'review_po' && (
             <div style={{ display: 'flex', gap: 12 }}>
-              <button onClick={() => handleApproval('approve')} className="btn-success">
-                \u2713 Approve PO
-              </button>
-              <button onClick={() => handleApproval('reject')} className="btn-danger">
-                \u2717 Reject PO
-              </button>
+              <Link href="/approvals" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                Go to Approval Queue →
+              </Link>
             </div>
           )}
           {step === 'done' && (
