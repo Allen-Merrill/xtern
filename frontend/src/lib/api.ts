@@ -66,9 +66,21 @@ export type ContainerPlan = {
   weight_utilisation_pct?: number;
 };
 
+async function safeFetch(url: string, init?: RequestInit): Promise<Response> {
+  try { return await fetch(url, init); }
+  catch { throw new Error('Cannot reach backend at ' + BACKEND_URL + ' — is the server running? Start it with: cd backend && uvicorn main:app --reload'); }
+}
+
+async function safeJson(res: Response) {
+  const text = await res.text();
+  if (!text) throw new Error('Backend returned an empty response — is the server running at ' + BACKEND_URL + '?');
+  try { return JSON.parse(text); }
+  catch { throw new Error('Backend returned invalid JSON: ' + text.slice(0, 200)); }
+}
+
 export async function fetchHealth() {
-  const res = await fetch(`${BACKEND_URL}/health`);
-  return res.json();
+  const res = await safeFetch(`${BACKEND_URL}/health`);
+  return safeJson(res);
 }
 
 export async function approvePO(
@@ -77,24 +89,24 @@ export async function approvePO(
   notes?: string,
   action: 'approve' | 'reject' = 'approve'
 ) {
-  const res = await fetch(`${BACKEND_URL}/pipeline/approve/${poNumber}`, {
+  const res = await safeFetch(`${BACKEND_URL}/pipeline/approve/${poNumber}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ reviewer, notes, action }),
   });
-  const data = await res.json();
+  const data = await safeJson(res);
   if (!res.ok) throw new Error(data?.detail || 'Failed to update PO.');
   return data;
 }
 
 /** Step 1: Start pipeline — runs Demand Analyst only */
 export async function startPipeline(skus: string[], horizonMonths = 3, triggeredBy = 'planner') {
-  const res = await fetch(`${BACKEND_URL}/pipeline/start`, {
+  const res = await safeFetch(`${BACKEND_URL}/pipeline/start`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ skus, horizon_months: horizonMonths, triggered_by: triggeredBy }),
   });
-  const data = await res.json();
+  const data = await safeJson(res);
   if (!res.ok) throw new Error(data?.detail || 'Failed to start pipeline.');
   return data as {
     run_id: string;
@@ -122,7 +134,7 @@ export async function continueAgent(
   }[],
   netRequirementsOverrides?: NetRequirement[]
 ) {
-  const res = await fetch(`${BACKEND_URL}/pipeline/${runId}/continue/${nextAgent}`, {
+  const res = await safeFetch(`${BACKEND_URL}/pipeline/${runId}/continue/${nextAgent}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -130,7 +142,7 @@ export async function continueAgent(
       net_requirements_overrides: netRequirementsOverrides || null,
     }),
   });
-  const data = await res.json();
+  const data = await safeJson(res);
   if (!res.ok) throw new Error(data?.detail || `Agent ${nextAgent} failed.`);
   return data as {
     run_id: string;
