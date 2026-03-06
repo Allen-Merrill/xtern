@@ -1,8 +1,8 @@
-# ProcureAI — Multi-Agent Supply Chain PO Automation
+# Procurefy — Multi-Agent Supply Chain PO Automation
 
 **Cummins Xtern Hackathon 2026** | IU Indianapolis
 
-ProcureAI is an AI-powered procurement system that automates purchase order generation for Cummins heavy-duty diesel engine parts. It uses a **4-agent LangGraph pipeline** with **human-in-the-loop** controls, **Model Context Protocol (MCP) servers** for structured data access, and a modern **Next.js** dashboard — enabling supply chain planners to go from demand analysis to approved PO in minutes instead of days.
+Procurefy is an AI-powered procurement system that automates purchase order generation for Cummins heavy-duty diesel engine parts. It uses a **4-agent LangGraph pipeline** with **human-in-the-loop** controls, **Model Context Protocol (MCP) servers** for structured data access, and a modern **Next.js** dashboard — enabling supply chain planners to go from demand analysis to approved PO in minutes instead of days.
 
 ---
 
