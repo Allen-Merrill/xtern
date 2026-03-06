@@ -17,7 +17,7 @@ const Logo = ({ className }: { className?: string }) => (
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#2B4162] to-[#9D5C63]">
             <Brain className="h-4 w-4 text-[#FFFACC]" />
         </div>
-        <span className="text-lg font-bold tracking-tight text-[#FFFACC]">ProcureAI</span>
+        <span className="text-lg font-bold tracking-tight text-[#FFFACC]">Procurefy</span>
     </div>
 )
 
@@ -376,7 +376,7 @@ function HeroMain() {
                         ))}
                     </div>
                     <p className="text-xs text-[#85877C]">
-                        ProcureAI &middot; Cummins Xtern 2026 &middot; Multi-Agent PO Automation
+                        Procurefy &middot; Cummins Xtern 2026 &middot; Multi-Agent PO Automation
                     </p>
                 </footer>
             </main>

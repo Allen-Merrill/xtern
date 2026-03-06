@@ -4,7 +4,7 @@ import { Providers } from '@/components/providers';
 import SidebarShell from '@/components/SidebarShell';
 
 export const metadata: Metadata = {
-  title: 'ProcureAI — Supply Chain PO Automation',
+  title: 'Procurefy — Supply Chain PO Automation',
   description: 'Multi-Agent Purchase Order Automation for Cummins',
 };
 

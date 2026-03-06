@@ -53,7 +53,7 @@ export default function SidebarShell({ children }: { children: React.ReactNode }
         {/* Brand */}
         <div style={{ marginBottom: 32, paddingLeft: 4 }}>
           <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-            ProcureAI
+            Procurefy
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>
             Supply Chain Automation
