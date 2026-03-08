@@ -28,6 +28,16 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+@app.get('/')
+def root():
+    """Root endpoint - confirms API is running."""
+    return {
+        'message': 'Supply Chain PO Automation API',
+        'version': '0.1.0',
+        'health_check': '/health',
+        'docs': '/docs'
+    }
+
 @app.get('/health')
 def health_check():
     return {
